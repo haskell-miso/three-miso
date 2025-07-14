@@ -7,7 +7,6 @@ executable app
   main-is:              Main.hs
   other-modules:        Model MyThree
   build-depends:        base, containers, jsaddle, miso, three
-  -- build-depends:        base, containers, jsaddle-run, miso, three
   default-language:     GHC2021
   ghc-options:          -Wall -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start" -ddump-splices
   cpp-options:          -DWASM
