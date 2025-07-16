@@ -82,5 +82,6 @@ main = run $ do
     (component model handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
+      , styles = [ Href "https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css" ]
       }
 
