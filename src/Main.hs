@@ -39,6 +39,7 @@ handleView model = div_ []
       , " - "
       , a_ [ href_ "https://haskell-miso.github.io/three-miso/" ] [ "demo" ]
       ]
+  , p_ [] [ "Use left click + drag to rotate, and middle mouse scroll too zom in each scene" ]
   ]
   where
     pauseOrRun = if model ^. mRunning then "pause" else "run"
