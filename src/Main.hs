@@ -1,12 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+{-# LANGUAGE CPP #-}
 module Main where
 
 import Data.Map (fromList)
 import Language.Javascript.JSaddle (JSM)
+
 import Miso
-import Miso.Lens 
 import Miso.Canvas qualified as Canvas
+import Miso.Lens
 import Miso.String (ms)
 import Miso.Style qualified as Style
 
@@ -69,9 +70,6 @@ handleUpdate ActionSwitchRunning = do
 -- main
 ----------------------------------------------------------------------
 
-#ifdef WASM
-foreign export javascript "hs_start" main :: IO ()
-#endif
 
 myGetTime :: JSM Double
 myGetTime = (* 0.001) <$> now
@@ -83,5 +81,13 @@ main = run $ do
     (component model handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
+      , scripts =
+          [ Src "https://cdnjs.cloudflare.com/ajax/libs/stats.js/7/Stats.min.js"
+          ]
       }
 
+----------------------------------------------------------------------------
+-- | WASM export, required when compiling w/ the WASM backend.
+#ifdef WASM
+foreign export javascript "hs_start" main :: IO ()
+#endif

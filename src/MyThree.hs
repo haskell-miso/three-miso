@@ -23,6 +23,7 @@ import THREE.OrbitControls
 import THREE.PerspectiveCamera
 import THREE.PointLight
 import THREE.Scene
+import THREE.Stats
 import THREE.SphereGeometry
 import THREE.TextureLoader
 import THREE.Vector3
@@ -51,6 +52,7 @@ data Context = Context
   , scene     :: THREE.Scene.Scene
   , camera    :: THREE.PerspectiveCamera.PerspectiveCamera
   , cube      :: THREE.Mesh.Mesh
+  , stats     :: THREE.Stats.Stats
   } deriving (Generic, FromJSVal, ToJSVal)
 
 ----------------------------------------------------------------------
@@ -61,7 +63,7 @@ initCanvas :: DOMRef -> Three Context
 initCanvas domref = do
   scene1 <- THREE.Scene.new 
 
-  light1 <- THREE.PointLight.new
+  light1 <- THREE.PointLight.new ()
   light1 & intensity .= 300
   light1 ^. position !.. setXYZ 8 8 8
   void $ scene1 & add light1
@@ -89,7 +91,12 @@ initCanvas domref = do
   controls1 <- THREE.OrbitControls.new (camera1, domref)
   controls1 & enabled .= True
 
-  pure $ Context renderer1 scene1 camera1 mesh2
+  stats <- THREE.Stats.new
+  stats & showPanel (1)
+  statsVal <- toJSVal stats
+  body <- jsg "document" ! "body"
+  body # "appendChild" $ [statsVal]
+  pure (Context renderer1 scene1 camera1 mesh2 stats)
 
 ----------------------------------------------------------------------
 -- draw canvas
@@ -98,6 +105,8 @@ initCanvas domref = do
 drawCanvas :: Model -> Double -> Context -> Three ()
 drawCanvas model speed Context {..} = 
   when (model Lens.^. mRunning) $ do
+    stats & begin ()
     cube & rotation !. y .= (speed * model Lens.^. mTime)
     renderer & render (scene, camera)
+    stats & end ()
 
