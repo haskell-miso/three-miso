@@ -81,9 +81,6 @@ main = run $ do
     (component model handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
-      , scripts =
-          [ Src "https://cdnjs.cloudflare.com/ajax/libs/stats.js/7/Stats.min.js"
-          ]
       }
 
 ----------------------------------------------------------------------------

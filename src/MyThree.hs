@@ -30,6 +30,7 @@ import THREE.Vector3
 import THREE.WebGLRenderer
 
 import Model
+import FFI
 
 ----------------------------------------------------------------------
 -- parameters
@@ -52,7 +53,7 @@ data Context = Context
   , scene     :: THREE.Scene.Scene
   , camera    :: THREE.PerspectiveCamera.PerspectiveCamera
   , cube      :: THREE.Mesh.Mesh
-  , stats     :: THREE.Stats.Stats
+  , stats     :: [THREE.Stats.Stats]
   } deriving (Generic, FromJSVal, ToJSVal)
 
 ----------------------------------------------------------------------
@@ -61,7 +62,8 @@ data Context = Context
 
 initCanvas :: DOMRef -> Three Context
 initCanvas domref = do
-  scene1 <- THREE.Scene.new 
+
+  scene1 <- THREE.Scene.new
 
   light1 <- THREE.PointLight.new ()
   light1 & intensity .= 300
@@ -91,12 +93,18 @@ initCanvas domref = do
   controls1 <- THREE.OrbitControls.new (camera1, domref)
   controls1 & enabled .= True
 
-  stats <- THREE.Stats.new
-  stats & showPanel (1)
-  statsVal <- toJSVal stats
-  body <- jsg "document" ! "body"
-  body # "appendChild" $ [statsVal]
-  pure (Context renderer1 scene1 camera1 mesh2 stats)
+  -- display FPS
+  stats1 <- THREE.Stats.new ()
+  stats1Dom <- stats1 ^. dom
+  appendInBody stats1Dom "230px" "15px"
+
+  -- display ms
+  stats2 <- THREE.Stats.new ()
+  stats2 & showPanel 1
+  stats2Dom <- stats2 ^. dom
+  appendInBody stats2Dom "330px" "15px"
+
+  pure (Context renderer1 scene1 camera1 mesh2 [stats1, stats2])
 
 ----------------------------------------------------------------------
 -- draw canvas
@@ -105,8 +113,7 @@ initCanvas domref = do
 drawCanvas :: Model -> Double -> Context -> Three ()
 drawCanvas model speed Context {..} = 
   when (model Lens.^. mRunning) $ do
-    stats & begin ()
     cube & rotation !. y .= (speed * model Lens.^. mTime)
     renderer & render (scene, camera)
-    stats & end ()
+    traverse_ (THREE.Stats.update ()) stats
 
