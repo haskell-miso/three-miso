@@ -5,8 +5,8 @@ version:                0.2
 executable app
   hs-source-dirs:       src
   main-is:              Main.hs
-  other-modules:        Model MyThree
-  build-depends:        base, containers, jsaddle, miso, three
+  other-modules:        Model MyThree FFI
+  build-depends:        base, containers, jsaddle, miso, three, lens
   default-language:     GHC2021
   ghc-options:          -Wall -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start" -ddump-splices
   cpp-options:          -DWASM

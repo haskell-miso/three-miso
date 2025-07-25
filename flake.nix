@@ -6,8 +6,10 @@
 
   outputs = inputs: 
     inputs.miso.inputs.flake-utils.lib.eachDefaultSystem (system: {
-      devShell = inputs.miso.outputs.devShells.${system}.wasm;
+      devShells = {
+        default = inputs.miso.outputs.devShells.${system}.default;
+        wasm = inputs.miso.outputs.devShells.${system}.wasm;
+      };
     });
-
 }
 

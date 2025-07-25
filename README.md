@@ -10,7 +10,7 @@
 Install [Nix Flakes](https://nixos.wiki/wiki/Flakes), then:
 
 ```
-nix develop
+nix develop .#wasm
 make
 make serve
 ```
