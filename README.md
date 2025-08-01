@@ -2,7 +2,7 @@
 
 ## Try online
 
-- [https://haskell-miso.github.io/three-miso](https://haskell-miso.github.io/three-miso)
+- [https://threejs.haskell-miso.org/](https://threejs.haskell-miso.org/)
 
 
 ## Build and run
