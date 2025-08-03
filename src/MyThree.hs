@@ -1,17 +1,19 @@
+----------------------------------------------------------------------
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-
+----------------------------------------------------------------------
 module MyThree where
-
+----------------------------------------------------------------------
 import Control.Monad (void, when)
 import Data.Function ((&))
 import Data.Foldable (traverse_)
 import GHC.Generics
 import Language.Javascript.JSaddle as JS
+----------------------------------------------------------------------
 import Miso
 import Miso.Lens qualified as Lens
-
+----------------------------------------------------------------------
 import THREE.BoxGeometry
 import THREE.Controls
 import THREE.Internal
@@ -28,26 +30,18 @@ import THREE.SphereGeometry
 import THREE.TextureLoader
 import THREE.Vector3
 import THREE.WebGLRenderer
-
+----------------------------------------------------------------------
 import Model
 import FFI
-
 ----------------------------------------------------------------------
--- parameters
-----------------------------------------------------------------------
-
 canvasWidth, canvasHeight :: Int
 canvasWidth = 200
 canvasHeight = 150
-
+----------------------------------------------------------------------
 canvasWidthD, canvasHeightD :: Double
 canvasWidthD = fromIntegral canvasWidth
 canvasHeightD = fromIntegral canvasHeight
-
 ----------------------------------------------------------------------
--- Context
-----------------------------------------------------------------------
-
 data Context = Context
   { renderer  :: THREE.WebGLRenderer.WebGLRenderer
   , scene     :: THREE.Scene.Scene
@@ -55,14 +49,9 @@ data Context = Context
   , cube      :: THREE.Mesh.Mesh
   , stats     :: [THREE.Stats.Stats]
   } deriving (Generic, FromJSVal, ToJSVal)
-
 ----------------------------------------------------------------------
--- initialize canvas
-----------------------------------------------------------------------
-
 initCanvas :: DOMRef -> Three Context
 initCanvas domref = do
-
   scene1 <- THREE.Scene.new
 
   light1 <- THREE.PointLight.new ()
@@ -105,15 +94,11 @@ initCanvas domref = do
   appendInBody stats2Dom "330px" "15px"
 
   pure (Context renderer1 scene1 camera1 mesh2 [stats1, stats2])
-
 ----------------------------------------------------------------------
--- draw canvas
-----------------------------------------------------------------------
-
 drawCanvas :: Model -> Double -> Context -> Three ()
 drawCanvas model speed Context {..} = 
   when (model Lens.^. mRunning) $ do
     cube & rotation !. y .= (speed * model Lens.^. mTime)
     renderer & render (scene, camera)
     traverse_ (THREE.Stats.update ()) stats
-
+----------------------------------------------------------------------
