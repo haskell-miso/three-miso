@@ -71,6 +71,13 @@ main = run $ do
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
+      , scripts = 
+        [ ImportMap 
+            [ "three" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/build/three.module.js"
+            , "three/addons/" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/examples/jsm/"
+            ]
+        , SrcModule "import-three.js"
+        ]
       }
 ----------------------------------------------------------------------------
 -- | WASM export, required when compiling w/ the WASM backend.
