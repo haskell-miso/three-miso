@@ -76,7 +76,11 @@ main = run $ do
       , initialAction = Just (ActionTime 0)
 #ifndef WASM
       , scripts =
-         [ Module
+        [ ImportMap 
+            [ "three" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/build/three.module.js"
+            , "three/addons/" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/examples/jsm/"
+            ]
+        , Module
             """
             import * as THREE from 'three';
             window.THREE = THREE;
