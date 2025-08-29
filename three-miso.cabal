@@ -25,6 +25,6 @@ executable app
   build-depends:
     base, containers, jsaddle, miso, three, lens
   default-language:
-    GHC2021
+    GHC2024
   default-extensions:
     CPP TemplateHaskell

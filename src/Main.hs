@@ -1,17 +1,20 @@
 ----------------------------------------------------------------------
+{-# LANGUAGE MultilineStrings  #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE CPP               #-}
 ----------------------------------------------------------------------
 module Main where
 ----------------------------------------------------------------------
 import Data.Map (fromList)
-import Language.Javascript.JSaddle (JSM)
+-- import Language.Javascript.JSaddle (JSM)
 ----------------------------------------------------------------------
 import Miso
 import Miso.Canvas qualified as Canvas
+import Miso.Html.Element as H
+import Miso.Html.Event as E
+import Miso.Html.Property as P
 import Miso.Lens
-import Miso.String (ms)
-import Miso.Style qualified as Style
+import Miso.CSS qualified as CSS
 ----------------------------------------------------------------------
 import Model
 import MyThree
@@ -31,7 +34,7 @@ handleView model = div_ []
   , p_
     []
     [ button_ 
-      [ Styles (fromList [Style.width "100px"])
+      [ Styles (fromList [CSS.width "100px"])
       , onClick ActionSwitchRunning
       ]
       [ pauseOrRun ]
@@ -50,7 +53,7 @@ handleView model = div_ []
     mkCanvas offset = Canvas.canvas_
       [ width_ (ms canvasWidth)
       , height_ (ms canvasHeight)
-      , Styles (fromList [Style.margin "5px"])
+      , Styles (fromList [CSS.margin "5px"])
       ] 
       initCanvas
       (drawCanvas model offset)
@@ -71,6 +74,19 @@ main = run $ do
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
+#ifndef WASM
+      , scripts =
+         [ Module
+            """
+            import * as THREE from 'three';
+            window.THREE = THREE;
+            import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+            window.OrbitControls = OrbitControls;
+            import Stats from 'three/addons/libs/stats.module.js';
+            window.Stats = Stats;
+            """
+         ]
+#endif
       }
 ----------------------------------------------------------------------------
 -- | WASM export, required when compiling w/ the WASM backend.
