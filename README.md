@@ -1,7 +1,8 @@
 # :ramen: 🧊 three-miso
 
-<img width="635" height="371" alt="image" src="https://github.com/user-attachments/assets/16f1ff9f-581f-42e1-b1f9-b4f54b81299d" />
-
+<a href="https://threejs.haskell-miso.org/">
+  <img width="635" height="371" alt="image" src="https://github.com/user-attachments/assets/16f1ff9f-581f-42e1-b1f9-b4f54b81299d" />
+</a>
 
 ## Try online
 
