@@ -6,7 +6,6 @@
 module Main where
 ----------------------------------------------------------------------
 import Data.Map (fromList)
--- import Language.Javascript.JSaddle (JSM)
 ----------------------------------------------------------------------
 import Miso
 import Miso.Canvas qualified as Canvas
@@ -26,8 +25,8 @@ data Action
 handleView :: Model -> View Model Action
 handleView model = div_ [] 
   [ h1_
-    []
-    [ "three-miso" ]
+    [ CSS.style_ [ CSS.fontFamily_ "monospace" ] ]
+    [ "🍜 🧊 three-miso" ]
   , div_
     []
     (map mkCanvas [1..5])
