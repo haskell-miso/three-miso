@@ -25,7 +25,7 @@ data Action
 handleView :: Model -> View Model Action
 handleView model = div_ [] 
   [ h1_
-    [ CSS.style_ [ CSS.fontFamily_ "monospace" ] ]
+    [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
     [ "🍜 🧊 three-miso" ]
   , div_
     []
