@@ -32,7 +32,6 @@ import THREE.Vector3
 import THREE.WebGLRenderer
 ----------------------------------------------------------------------
 import Model
-import FFI
 ----------------------------------------------------------------------
 canvasWidth, canvasHeight :: Int
 canvasWidth = 200
@@ -81,17 +80,6 @@ initCanvas domref = do
 
   controls1 <- THREE.OrbitControls.new (camera1, domref)
   controls1 & enabled .= True
-
-  -- display FPS
-  stats1 <- THREE.Stats.new ()
-  stats1Dom <- stats1 ^. dom
-  appendInBody stats1Dom "230px" "15px"
-
-  -- display ms
-  stats2 <- THREE.Stats.new ()
-  stats2 & showPanel 1
-  stats2Dom <- stats2 ^. dom
-  appendInBody stats2Dom "330px" "15px"
 
   pure (Context renderer1 scene1 camera1 mesh2 [stats1, stats2])
 ----------------------------------------------------------------------
