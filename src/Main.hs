@@ -68,8 +68,19 @@ myGetTime :: JSM Double
 myGetTime = (* 0.001) <$> now
 ----------------------------------------------------------------------
 main :: IO ()
-main = run $ do
-  startApp
+main = do
+  -- display FPS
+  stats1 <- THREE.Stats.new ()
+  stats1Dom <- stats1 ^. dom
+  appendInBody stats1Dom "230px" "15px"
+
+  -- display ms
+  stats2 <- THREE.Stats.new ()
+  stats2 & showPanel 1
+  stats2Dom <- stats2 ^. dom
+  appendInBody stats2Dom "330px" "15px"
+
+  run $ startApp
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
