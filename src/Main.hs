@@ -26,7 +26,7 @@ handleView :: Model -> View Model Action
 handleView model = div_ [] 
   [ h1_
     [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
-    [ "🍜 🧊 three-miso" ]
+    [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "source" ] ]
   , div_
     []
     (map mkCanvas [1..5])
@@ -38,12 +38,7 @@ handleView model = div_ []
       ]
       [ pauseOrRun ]
     ]
-  , p_ []
-    [ a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "source" ]
-    , " - "
-    , a_ [ href_ "https://haskell-miso.github.io/three-miso/" ] [ "demo" ]
-    ]
-  , p_ []
+  , p_ [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
     [ "Use left click + drag to rotate, and middle mouse scroll too zom in each scene"
     ]
   ]
