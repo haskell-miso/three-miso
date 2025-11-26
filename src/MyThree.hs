@@ -85,13 +85,13 @@ initCanvas domref = do
   -- display FPS
   stats1 <- THREE.Stats.new ()
   stats1Dom <- stats1 ^. dom
-  appendInBody stats1Dom "230px" "15px"
+  appendInBody stats1Dom "300px" "15px"
 
   -- display ms
   stats2 <- THREE.Stats.new ()
   stats2 & showPanel 1
   stats2Dom <- stats2 ^. dom
-  appendInBody stats2Dom "330px" "15px"
+  appendInBody stats2Dom "400px" "15px"
 
   pure (Context renderer1 scene1 camera1 mesh2 [stats1, stats2])
 ----------------------------------------------------------------------
