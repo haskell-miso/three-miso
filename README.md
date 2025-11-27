@@ -1,11 +1,10 @@
 # :ramen: 🧊 three-miso
 
 <a href="https://threejs.haskell-miso.org/">
-  <img width="635" height="229" alt="image" src="https://github.com/user-attachments/assets/b1c74c88-126c-42b6-bc66-c2e191ba3c68" />
+  <img width="636" height="299" alt="image" src="https://github.com/user-attachments/assets/7855479d-6faf-4eef-a62e-a618f675c9c8" />
 </a>
 
 ## Try online
-
 - [https://threejs.haskell-miso.org/](https://threejs.haskell-miso.org/)
 
 
