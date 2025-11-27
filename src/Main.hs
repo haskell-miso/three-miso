@@ -26,7 +26,7 @@ handleView :: Model -> View Model Action
 handleView model = div_ [] 
   [ h1_
     [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
-    [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "source" ] ]
+    [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three-miso" ] ]
   , div_
     []
     (map mkCanvas [1..5])
