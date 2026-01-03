@@ -1,15 +1,18 @@
 ----------------------------------------------------------------------
+{-# LANGUAGE OverloadedStrings #-}
+----------------------------------------------------------------------
 module FFI 
   ( appendInBody
   ) where
 ----------------------------------------------------------------------
+import Miso
 import Control.Monad (void)
-import Control.Lens hiding ((#))
-import Language.Javascript.JSaddle as J
 ----------------------------------------------------------------------
-appendInBody :: JSVal -> JSString -> JSString -> JSM ()
+appendInBody :: JSVal -> MisoString -> MisoString -> IO ()
 appendInBody v left top = do
-  void $ jsg "document" ^. js "body" ^. js1 "appendChild" v
-  void $ v ^. js "style" ^. jss "left" left
-  void $ v ^. js "style" ^. jss "top" top
+  body <- jsg "document" ! "body"
+  body # "appendChild" $ [v]
+  vStyle <- v ! "style"
+  setField vStyle "left" left
+  setField vStyle "top" top
 ----------------------------------------------------------------------

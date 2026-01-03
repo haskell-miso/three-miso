@@ -9,7 +9,6 @@ import Control.Monad (void, when)
 import Data.Function ((&))
 import Data.Foldable (traverse_)
 import GHC.Generics
-import Language.Javascript.JSaddle as JS
 ----------------------------------------------------------------------
 import Miso
 import Miso.Lens qualified as Lens
@@ -48,7 +47,26 @@ data Context = Context
   , camera    :: THREE.PerspectiveCamera.PerspectiveCamera
   , cube      :: THREE.Mesh.Mesh
   , stats     :: [THREE.Stats.Stats]
-  } deriving (Generic, FromJSVal, ToJSVal)
+  }
+----------------------------------------------------------------------
+instance ToJSVal Context where
+  toJSVal Context {..} = do
+    o <- create
+    setField o "renderer" =<< toJSVal renderer
+    setField o "scene" =<< toJSVal scene
+    setField o "camera" =<< toJSVal camera
+    setField o "cube" =<< toJSVal cube
+    setField o "stats" =<< toJSVal stats
+    toJSVal o
+----------------------------------------------------------------------
+instance FromJSVal Context where
+  fromJSVal o = do
+    _renderer <- fromJSVal =<< o ! "renderer"
+    _scene <- fromJSVal =<< o ! "scene"
+    _camera <- fromJSVal =<< o ! "camera"
+    _cube <- fromJSVal =<< o ! "cube"
+    _stats <- fromJSVal =<< o ! "stats"
+    pure (Context <$> _renderer <*> _scene <*> _camera <*> _cube <*> _stats)
 ----------------------------------------------------------------------
 initCanvas :: DOMRef -> Three Context
 initCanvas domref = do

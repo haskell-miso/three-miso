@@ -59,7 +59,7 @@ handleUpdate (ActionTime t) = do
 handleUpdate ActionSwitchRunning = do
   mRunning %= not
 ----------------------------------------------------------------------
-myGetTime :: JSM Double
+myGetTime :: IO Double
 myGetTime = (* 0.001) <$> now
 ----------------------------------------------------------------------
 main :: IO ()
