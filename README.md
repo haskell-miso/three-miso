@@ -7,6 +7,9 @@
 ## Try online
 - [https://threejs.haskell-miso.org/](https://threejs.haskell-miso.org/)
 
+## Dependencies
+
+This example relies on [three.hs](https://github.com/three-hs/three.hs).
 
 ## Build and run
 
