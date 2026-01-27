@@ -63,8 +63,8 @@ myGetTime :: IO Double
 myGetTime = (* 0.001) <$> now
 ----------------------------------------------------------------------
 main :: IO ()
-main = run $ do
-  startApp
+main =
+  startApp defaultEvents
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
       , initialAction = Just (ActionTime 0)
