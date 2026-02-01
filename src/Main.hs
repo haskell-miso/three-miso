@@ -67,7 +67,7 @@ main =
   startApp defaultEvents
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
-      , initialAction = Just (ActionTime 0)
+      , mount = Just (ActionTime 0)
 #ifndef WASM
       , scripts =
         [ ImportMap 
