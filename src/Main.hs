@@ -52,7 +52,7 @@ handleView model = div_ []
       initCanvas
       (drawCanvas model offset)
 ----------------------------------------------------------------------
-handleUpdate :: Action -> Transition Model Action
+handleUpdate :: Action -> Effect parent Model Action
 handleUpdate (ActionTime t) = do
   mTime .= t
   io (ActionTime <$> myGetTime)
