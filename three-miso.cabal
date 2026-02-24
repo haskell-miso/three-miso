@@ -4,7 +4,7 @@ version:                0.2
 
 common warnings
   ghc-options:
-    -funbox-strict-fields -O2 -ferror-spans -fspecialise-aggressively -Wall
+    -funbox-strict-fields -O2 -ferror-spans -fspecialise-aggressively -Wall -fdicts-cheap
 
 common wasm
   if arch(wasm32)
