@@ -23,12 +23,11 @@ data Action
   | ActionSwitchRunning
 ----------------------------------------------------------------------
 handleView :: Model -> View Model Action
-handleView model = div_ [] 
+handleView model = vfrag
   [ h1_
     [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
     [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three-miso" ] ]
-  , div_
-    []
+  , vfrag
     (map mkCanvas [1..5])
   , p_
     []
