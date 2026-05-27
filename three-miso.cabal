@@ -23,7 +23,7 @@ executable app
   other-modules:
     Model MyThree FFI
   build-depends:
-    base, containers, miso, three
+    base, containers, miso >=1.11 && <2.0, three
   default-language:
     GHC2024
   default-extensions:

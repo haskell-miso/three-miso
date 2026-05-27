@@ -22,8 +22,8 @@ data Action
   = ActionTime Double
   | ActionSwitchRunning
 ----------------------------------------------------------------------
-handleView :: Model -> View Model Action
-handleView model = vfrag
+handleView :: props -> Model -> View Model Action
+handleView _ model = vfrag
   [ h1_
     [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
     [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three-miso" ] ]
@@ -51,7 +51,7 @@ handleView model = vfrag
       initCanvas
       (drawCanvas model offset)
 ----------------------------------------------------------------------
-handleUpdate :: Action -> Effect parent Model Action
+handleUpdate :: Action -> Effect parent props Model Action
 handleUpdate (ActionTime t) = do
   mTime .= t
   io (ActionTime <$> myGetTime)
