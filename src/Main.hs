@@ -19,7 +19,7 @@ import Model
 import MyThree
 ----------------------------------------------------------------------
 data Action
-  = ActionTime Double
+  = Tick Double
   | ActionSwitchRunning
 ----------------------------------------------------------------------
 handleView :: props -> Model -> View Model Action
@@ -52,21 +52,16 @@ handleView _ model = vfrag
       (drawCanvas model offset)
 ----------------------------------------------------------------------
 handleUpdate :: Action -> Effect parent props Model Action
-handleUpdate (ActionTime t) = do
-  mTime .= t
-  io (ActionTime <$> myGetTime)
-handleUpdate ActionSwitchRunning = do
-  mRunning %= not
-----------------------------------------------------------------------
-myGetTime :: IO Double
-myGetTime = (* 0.001) <$> now
+handleUpdate = \case
+  Tick t -> mTime .= t
+  ActionSwitchRunning -> mRunning %= not
 ----------------------------------------------------------------------
 main :: IO ()
 main =
   startApp defaultEvents
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
-      , mount = Just (ActionTime 0)
+      , subs = [ rAFSub Tick ]
 #ifndef WASM
       , scripts =
         [ ImportMap 

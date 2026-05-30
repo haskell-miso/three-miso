@@ -116,7 +116,7 @@ initCanvas domref = do
 drawCanvas :: Model -> Double -> Context -> Three ()
 drawCanvas model speed Context {..} = 
   when (model Lens.^. mRunning) $ do
-    cube & rotation !. y .= (speed * model Lens.^. mTime)
+    cube & rotation !. y .= ((speed * model Lens.^. mTime) / 1000)
     renderer & render (scene, camera)
     traverse_ (THREE.Stats.update ()) stats
 ----------------------------------------------------------------------
