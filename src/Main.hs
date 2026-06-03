@@ -23,37 +23,57 @@ data Action
   | ActionSwitchRunning
 ----------------------------------------------------------------------
 handleView :: props -> Model -> View Model Action
-handleView _ model = vfrag
-  [ h1_
-    [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
-    [ "🍜 🧊 ", a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three-miso" ] ]
-  , vfrag
-    (map mkCanvas [1..5])
-  , p_
-    []
-    [ button_ 
-      [ Styles (fromList [CSS.width "100px"])
-      , onClick ActionSwitchRunning
+handleView _ model = div_
+  [ CSS.style_ [ CSS.backgroundColor (CSS.hex "e2e0e0"), CSS.margin "0", CSS.padding "0", CSS.overflow "hidden" ] ]
+  [ div_
+      [ CSS.style_
+          [ CSS.position "absolute"
+          , CSS.top "10px"
+          , CSS.left "10px"
+          , CSS.zIndex "100"
+          , CSS.color (CSS.hex "000")
+          , CSS.fontFamily "monospace"
+          , CSS.fontSize "13px"
+          ]
       ]
-      [ pauseOrRun ]
-    ]
-  , p_ [ CSS.style_ [ CSS.fontFamily "monospace" ] ]
-    [ "Use left click + drag to rotate, and middle mouse scroll too zom in each scene"
-    ]
-  ]
-  where
-    pauseOrRun = if model ^. mRunning then "pause" else "run"  
-    mkCanvas offset = Canvas.canvas_
-      [ width_ (ms canvasWidth)
-      , height_ (ms canvasHeight)
-      , Styles (fromList [CSS.margin "5px"])
-      ] 
+      [ a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three.hs" ]
+      , " webgl - animation - keyframes"
+      , br_ []
+      , "Model: "
+      , a_ [ href_ "https://artstation.com/artwork/1AGwX" ] [ "Littlest Tokyo" ]
+      , " by "
+      , a_ [ href_ "https://artstation.com/glenatron" ] [ "Glen Fox" ]
+      , ", CC Attribution."
+      ]
+  , Canvas.canvas_
+      [ CSS.style_
+          [ CSS.display "block"
+          , CSS.position "fixed"
+          , CSS.top "0"
+          , CSS.left "0"
+          ]
+      ]
       initCanvas
-      (drawCanvas model offset)
+      (drawCanvas model)
+  , div_
+      [ CSS.style_
+          [ CSS.position "absolute"
+          , CSS.bottom "10px"
+          , CSS.left "10px"
+          , CSS.zIndex "100"
+          ]
+      ]
+      [ button_
+          [ Styles (fromList [CSS.width "80px"])
+          , onClick ActionSwitchRunning
+          ]
+          [ if model ^. mRunning then "pause" else "run" ]
+      ]
+  ]
 ----------------------------------------------------------------------
 handleUpdate :: Action -> Effect parent props Model Action
 handleUpdate = \case
-  Tick t -> mTime .= t
+  Tick t          -> mTime .= t
   ActionSwitchRunning -> mRunning %= not
 ----------------------------------------------------------------------
 main :: IO ()
@@ -64,8 +84,8 @@ main =
       , subs = [ rAFSub Tick ]
 #ifndef WASM
       , scripts =
-        [ ImportMap 
-            [ "three" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/build/three.module.js"
+        [ ImportMap
+            [ "three"        =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/build/three.module.js"
             , "three/addons/" =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/examples/jsm/"
             ]
         , Module
@@ -76,8 +96,14 @@ main =
             window.OrbitControls = OrbitControls;
             import Stats from 'three/addons/libs/stats.module.js';
             window.Stats = Stats;
+            import { Sky } from 'three/addons/objects/Sky.js';
+            window.Sky = Sky;
+            import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+            window.GLTFLoader = GLTFLoader;
+            import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+            window.DRACOLoader = DRACOLoader;
             """
-         ]
+        ]
 #endif
       }
 ----------------------------------------------------------------------------

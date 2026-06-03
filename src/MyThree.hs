@@ -1,122 +1,179 @@
 ----------------------------------------------------------------------
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveAnyClass    #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards   #-}
 ----------------------------------------------------------------------
 module MyThree where
 ----------------------------------------------------------------------
-import Control.Monad (void, when)
+import Control.Monad (void, when, unless)
 import Data.Function ((&))
-import Data.Foldable (traverse_)
-import GHC.Generics
 ----------------------------------------------------------------------
 import Miso
+import qualified Miso.DSL as J
 import Miso.Lens qualified as Lens
 ----------------------------------------------------------------------
-import THREE.BoxGeometry
-import THREE.Controls
 import THREE.Internal
-import THREE.Light
-import THREE.Mesh
-import THREE.MeshLambertMaterial
-import THREE.Object3D
 import THREE.OrbitControls
 import THREE.PerspectiveCamera
-import THREE.PointLight
 import THREE.Scene
 import THREE.Stats
-import THREE.SphereGeometry
-import THREE.TextureLoader
-import THREE.Vector3
 import THREE.WebGLRenderer
 ----------------------------------------------------------------------
 import Model
 import FFI
 ----------------------------------------------------------------------
-canvasWidth, canvasHeight :: Int
-canvasWidth = 200
-canvasHeight = 150
-----------------------------------------------------------------------
-canvasWidthD, canvasHeightD :: Double
-canvasWidthD = fromIntegral canvasWidth
-canvasHeightD = fromIntegral canvasHeight
-----------------------------------------------------------------------
 data Context = Context
-  { renderer  :: THREE.WebGLRenderer.WebGLRenderer
-  , scene     :: THREE.Scene.Scene
-  , camera    :: THREE.PerspectiveCamera.PerspectiveCamera
-  , cube      :: THREE.Mesh.Mesh
-  , stats     :: [THREE.Stats.Stats]
+  { ctxRenderer :: WebGLRenderer
+  , ctxScene    :: Scene
+  , ctxCamera   :: PerspectiveCamera
+  , ctxControls :: OrbitControls
+  , ctxClock    :: JSVal
+  , ctxStats    :: Stats
   }
 ----------------------------------------------------------------------
 instance ToJSVal Context where
   toJSVal Context {..} = do
     o <- create
-    setField o "renderer" =<< toJSVal renderer
-    setField o "scene" =<< toJSVal scene
-    setField o "camera" =<< toJSVal camera
-    setField o "cube" =<< toJSVal cube
-    setField o "stats" =<< toJSVal stats
+    setField o "renderer" =<< toJSVal ctxRenderer
+    setField o "scene"    =<< toJSVal ctxScene
+    setField o "camera"   =<< toJSVal ctxCamera
+    setField o "controls" =<< toJSVal ctxControls
+    setField o "clock"    ctxClock
+    setField o "stats"    =<< toJSVal ctxStats
     toJSVal o
 ----------------------------------------------------------------------
 instance FromJSVal Context where
   fromJSVal o = do
-    _renderer <- fromJSVal =<< o ! "renderer"
-    _scene <- fromJSVal =<< o ! "scene"
-    _camera <- fromJSVal =<< o ! "camera"
-    _cube <- fromJSVal =<< o ! "cube"
-    _stats <- fromJSVal =<< o ! "stats"
-    pure (Context <$> _renderer <*> _scene <*> _camera <*> _cube <*> _stats)
+    renderer' <- fromJSVal =<< o ! "renderer"
+    scene'    <- fromJSVal =<< o ! "scene"
+    camera'   <- fromJSVal =<< o ! "camera"
+    controls' <- fromJSVal =<< o ! "controls"
+    clock'    <- o ! "clock"
+    stats'    <- fromJSVal =<< o ! "stats"
+    pure $ Context
+      <$> renderer'
+      <*> scene'
+      <*> camera'
+      <*> controls'
+      <*> pure clock'
+      <*> stats'
 ----------------------------------------------------------------------
 initCanvas :: DOMRef -> Three Context
-initCanvas domref = do
-  scene1 <- THREE.Scene.new
+initCanvas domRef = do
+  -- Window dimensions for a fullscreen renderer
+  w_ <- fromJSValUnchecked =<< jsg "window" ! "innerWidth"  :: IO Double
+  h <- fromJSValUnchecked =<< jsg "window" ! "innerHeight" :: IO Double
 
-  light1 <- THREE.PointLight.new ()
-  light1 & intensity .= 300
-  light1 ^. position !.. setXYZ 8 8 8
-  void $ scene1 & add light1
+  -- Renderer
+  renderer <- THREE.WebGLRenderer.new (Just domRef)
+  renderer & setSize (round w_, round h, True)
+  rendVal <- toJSVal renderer
+  pixRatio <- fromJSValUnchecked =<< jsg "window" ! "devicePixelRatio" :: IO Double
+  void $ rendVal # "setPixelRatio" $ [pixRatio]
+  acesVal <- jsg "THREE" ! "ACESFilmicToneMapping"
+  setField rendVal "toneMapping" acesVal
 
-  material1 <- THREE.MeshLambertMaterial.new
-  geometry1 <- THREE.SphereGeometry.new
-  mesh1 <- THREE.Mesh.new (geometry1, material1)
-  mesh1 & position !. x .= (-1)
+  -- Scene
+  scene <- THREE.Scene.new
+  sceneVal <- toJSVal scene
 
-  texture2 <- THREE.TextureLoader.new >>= load "miso.png"
-  material2 <- THREE.MeshLambertMaterial.new
-  material2 & THREE.MeshLambertMaterial.map .= Just texture2
-  geometry2 <- THREE.BoxGeometry.new (1, 1, 1)
-  mesh2 <- THREE.Mesh.new (geometry2, material2)
-  (mesh2 ^. position) !.. setXYZ 1 0 0 
+  -- Sky
+  skyCls <- jsg "Sky"
+  skyVal <- J.new skyCls ()
+  skyScale <- skyVal ! "scale"
+  void $ skyScale # "setScalar" $ [10000.0 :: Double]
+  void $ sceneVal # "add" $ [skyVal]
+  skyMat <- skyVal ! "material"
+  uniforms <- skyMat ! "uniforms"
+  turbidity <- uniforms ! "turbidity"
+  setField turbidity "value" (0.0 :: Double)
+  rayleigh <- uniforms ! "rayleigh"
+  setField rayleigh "value" (3.0 :: Double)
+  mieG <- uniforms ! "mieDirectionalG"
+  setField mieG "value" (0.7 :: Double)
+  sunPosUniform <- uniforms ! "sunPosition"
+  sunPosVec <- sunPosUniform ! "value"
+  void $ sunPosVec # "set" $ ((-0.8) :: Double, 0.19 :: Double, 0.56 :: Double)
 
-  traverse_ (`add` scene1) [mesh1, mesh2]
+  -- PMREMGenerator for image-based lighting from the Sky
+  pmremCls <- jsg "THREE" ! "PMREMGenerator"
+  pmremVal <- J.new pmremCls [rendVal]
+  envResult <- pmremVal # "fromScene" $ [skyVal]
+  envTex <- envResult ! "texture"
+  setField sceneVal "environment" envTex
+  void $ pmremVal # "dispose" $ ()
 
-  camera1 <- THREE.PerspectiveCamera.new (70, canvasWidthD/canvasHeightD, 0.1, 100)
-  camera1 & position !. z .= 3
+  -- Camera
+  camera <- THREE.PerspectiveCamera.new (40, w_ / h, 1, 100)
+  camVal <- toJSVal camera
+  camPos <- camVal ! "position"
+  void $ camPos # "set" $ (5.0 :: Double, 2.0 :: Double, 8.0 :: Double)
 
-  renderer1 <- THREE.WebGLRenderer.new (Just domref)
-  renderer1 & setSize (canvasWidth, canvasHeight, True)
+  -- OrbitControls with damping and look-at target
+  controls <- THREE.OrbitControls.new (camera, domRef)
+  ctrlVal <- toJSVal controls
+  setField ctrlVal "enableDamping" True
+  ctrlTarget <- ctrlVal ! "target"
+  void $ ctrlTarget # "set" $ (0.0 :: Double, 0.7 :: Double, 0.0 :: Double)
+  void $ THREE.OrbitControls.update () controls
 
-  controls1 <- THREE.OrbitControls.new (camera1, domref)
-  controls1 & enabled .= True
+  -- THREE.Clock for per-frame delta time
+  clockCls <- jsg "THREE" ! "Clock"
+  clockVal <- J.new clockCls ()
 
-  -- display FPS
-  stats1 <- THREE.Stats.new ()
-  stats1Dom <- stats1 ^. dom
-  appendInBody stats1Dom "300px" "15px"
+  -- Store AnimationMixer in a JS global so the async callback can write to it
+  winVal <- jsg "window"
+  setField winVal "__tokyoMixer__" jsNull
 
-  -- display ms
-  stats2 <- THREE.Stats.new ()
-  stats2 & showPanel 1
-  stats2Dom <- stats2 ^. dom
-  appendInBody stats2Dom "400px" "15px"
+  -- DRACOLoader (compressed geometry decoder)
+  dracoLoaderCls <- jsg "DRACOLoader"
+  dracoLoaderVal <- J.new dracoLoaderCls ()
+  void $ dracoLoaderVal # "setDecoderPath" $
+    ["https://www.gstatic.com/draco/versioned/decoders/1.5.6/" :: MisoString]
 
-  pure (Context renderer1 scene1 camera1 mesh2 [stats1, stats2])
+  -- GLTFLoader
+  gltfLoaderCls <- jsg "GLTFLoader"
+  gltfLoaderVal <- J.new gltfLoaderCls ()
+  void $ gltfLoaderVal # "setDRACOLoader" $ [dracoLoaderVal]
+
+  -- Async callback: runs once the .glb model is ready
+  onLoad <- asyncCallback1 $ \gltfVal -> do
+    modelVal <- gltfVal ! "scene"
+    modelPos <- modelVal ! "position"
+    void $ modelPos # "set" $ (1.0 :: Double, 1.0 :: Double, 0.0 :: Double)
+    modelScale <- modelVal ! "scale"
+    void $ modelScale # "set" $ (0.01 :: Double, 0.01 :: Double, 0.01 :: Double)
+    void $ sceneVal # "add" $ [modelVal]
+    mixerCls <- jsg "THREE" ! "AnimationMixer"
+    mixerVal <- J.new mixerCls [modelVal]
+    anims <- gltfVal ! "animations"
+    anim0 <- anims Miso.!! (0 :: Int)
+    action <- mixerVal # "clipAction" $ [anim0]
+    void $ action # "play" $ ()
+    w2 <- jsg "window"
+    setField w2 "__tokyoMixer__" mixerVal
+
+  void $ gltfLoaderVal # "load" $
+    ( "https://threejs.org/examples/models/gltf/LittlestTokyo.glb" :: MisoString
+    , onLoad
+    )
+
+  -- Stats overlay
+  stats <- THREE.Stats.new ()
+  statsDOM <- stats ^. dom
+  appendInBody statsDOM "0px" "0px"
+
+  pure (Context renderer scene camera controls clockVal stats)
 ----------------------------------------------------------------------
-drawCanvas :: Model -> Double -> Context -> Three ()
-drawCanvas model speed Context {..} = 
+drawCanvas :: Model -> Context -> Three ()
+drawCanvas model Context {..} =
   when (model Lens.^. mRunning) $ do
-    cube & rotation !. y .= ((speed * model Lens.^. mTime) / 1000)
-    renderer & render (scene, camera)
-    traverse_ (THREE.Stats.update ()) stats
+    delta :: Double <- fromJSValUnchecked =<< do ctxClock # "getDelta" $ ()
+    mixerVal <- jsg "window" ! "__tokyoMixer__"
+    nullMixer <- isNull mixerVal
+    unless nullMixer $
+      void $ mixerVal # "update" $ [delta]
+    void $ THREE.OrbitControls.update () ctxControls
+    ctxRenderer & render (ctxScene, ctxCamera)
+    THREE.Stats.update () ctxStats
 ----------------------------------------------------------------------
