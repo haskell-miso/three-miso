@@ -36,7 +36,7 @@ handleView _ model = div_
           , CSS.fontSize "13px"
           ]
       ]
-      [ a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "three.hs" ]
+      [ a_ [ href_ "https://github.com/haskell-miso/three-miso" ] [ "littlest-tokyo-miso" ]
       , " webgl - animation - keyframes"
       , br_ []
       , "Model: "
