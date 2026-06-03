@@ -64,14 +64,20 @@ initCanvas domRef = do
   w_ <- fromJSValUnchecked =<< jsg "window" ! "innerWidth"  :: IO Double
   h <- fromJSValUnchecked =<< jsg "window" ! "innerHeight" :: IO Double
 
-  -- Renderer
-  renderer <- THREE.WebGLRenderer.new (Just domRef)
+  -- Renderer with antialias enabled
+  rendOpts <- create
+  setField rendOpts "canvas" domRef
+  setField rendOpts "antialias" True
+  rendCls <- jsg ("THREE" :: MisoString) ! ("WebGLRenderer" :: MisoString)
+  rendRaw <- J.new rendCls rendOpts
+  let renderer = WebGLRenderer rendRaw
   renderer & setSize (round w_, round h, True)
   rendVal <- toJSVal renderer
   pixRatio <- fromJSValUnchecked =<< jsg "window" ! "devicePixelRatio" :: IO Double
   void $ rendVal # "setPixelRatio" $ [pixRatio]
   acesVal <- jsg "THREE" ! "ACESFilmicToneMapping"
   setField rendVal "toneMapping" acesVal
+  setField rendVal "toneMappingExposure" (1.0 :: Double)
 
   -- Scene
   scene <- THREE.Scene.new
