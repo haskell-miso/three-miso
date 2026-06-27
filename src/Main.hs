@@ -214,7 +214,7 @@ handleView _ model = div_
           [ CSS.position "absolute"
           , CSS.top "10px"
           , CSS.left "10px"
-          , CSS.zIndex "100"
+          , CSS.zIndex 100
           , CSS.color (CSS.hex "000")
           , CSS.fontFamily "monospace"
           , CSS.fontSize "13px"
