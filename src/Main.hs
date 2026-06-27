@@ -244,7 +244,7 @@ handleView _ model = div_
           [ CSS.position "absolute"
           , CSS.bottom "10px"
           , CSS.left "10px"
-          , CSS.zIndex "100"
+          , CSS.zIndex 100
           ]
       ]
       [ button_
