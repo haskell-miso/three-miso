@@ -206,8 +206,8 @@ data Action
   = Tick Double
   | ActionSwitchRunning
 ----------------------------------------------------------------------
-handleView :: props -> Model -> View Model Action
-handleView _ model = div_
+handleView :: context -> props -> Model -> View context Model Action
+handleView _ _ model = div_
   [ CSS.style_ [ CSS.backgroundColor (CSS.hex "e2e0e0"), CSS.margin "0", CSS.padding "0", CSS.overflow "hidden" ] ]
   [ div_
       [ CSS.style_
