@@ -14,4 +14,4 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/three-hs/three.hs
-  branch: master
+  branch: 8af69c0d3e6b4f14efb9dd1e65c85c7df9be095d
