@@ -18,7 +18,6 @@ import Miso.Html.Event as E
 import Miso.Html.Property as P
 import Miso.Lens
 import Miso.Lens qualified as Lens
-import Miso.Lens.TH (makeLenses)
 import Miso.CSS qualified as CSS
 ----------------------------------------------------------------------
 import THREE.Internal
@@ -35,7 +34,11 @@ data Model = Model
   , _mRunning :: Bool
   } deriving (Eq)
 ----------------------------------------------------------------------
-makeLenses ''Model
+mTime :: Lens Model Double
+mTime = lens _mTime $ \r x -> r { _mTime = x }
+
+mRunning :: Lens Model Bool
+mRunning = lens _mRunning $ \r x -> r { _mRunning = x }
 ----------------------------------------------------------------------
 mkModel :: Model
 mkModel = Model 0 True
@@ -266,7 +269,7 @@ main =
     (component mkModel handleUpdate handleView)
       { logLevel = DebugAll
       , subs = [ rAFSub Tick ]
-#ifndef WASM
+#if !defined(WASM) && !defined(MHS)
       , scripts =
         [ ImportMap
             [ "three"         =: "https://cdn.jsdelivr.net/npm/three@v0.178.0/build/three.module.js"

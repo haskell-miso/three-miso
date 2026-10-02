@@ -21,3 +21,11 @@ make
 make serve
 ```
 
+Or with [MicroHs](https://github.com/augustss/MicroHs):
+
+```
+nix develop .#mhs
+make mhs
+make serve
+```
+

@@ -9,6 +9,7 @@
       devShells = {
         default = inputs.miso.outputs.devShells.${system}.default;
         wasm = inputs.miso.outputs.devShells.${system}.wasm;
+        mhs = inputs.miso.outputs.devShells.${system}.mhs;
       };
     });
 }
