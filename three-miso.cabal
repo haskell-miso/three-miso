@@ -12,6 +12,9 @@ common wasm
       -no-hs-main -optl-mexec-model=reactor "-optl-Wl,--export=hs_start"
     cpp-options:
       -DWASM
+  elif impl(mhs)
+    cpp-options:
+      -DMHS
 
 executable app
   import:
@@ -25,4 +28,4 @@ executable app
   default-language:
     GHC2024
   default-extensions:
-    CPP TemplateHaskell
+    CPP
